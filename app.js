@@ -1,9 +1,9 @@
 const url = require('url');
+const _ = require('lodash');
 const express = require('express');
 const app = express();
 
 const PORT = process.env.PORT || 8080;
-const DESTINATION_URL = process.env.DESTINATION_URL ||'https://requestbin.herokuapp.com/1g4lmbx1';
 
 const CLIENT_ID = process.env.CLIENT_ID || '' ;
 const CLIENT_SECRET = process.env.CLIENT_SECRET || '' ;
@@ -16,7 +16,6 @@ var accessToken = process.env.ACCESS_TOKEN ||'SOMETOKEN';
 
 const httpProxy = require('http-proxy');
 const proxy = httpProxy.createProxyServer({
-  target: url.parse(DESTINATION_URL),
   ignorePath: true,
   changeOrigin: true
 });
@@ -26,7 +25,19 @@ app.get('/', (req, res) => {
 });
 
 app.post('/proxy', (req, res) => {
-  proxy.web(req, res);
+  const targetUrl = req.query['target'];
+
+  if (!(_.isString(targetUrl) && targetUrl.length > 0)) {
+    return res.
+      status(400).
+      send(JSON.stringify({ error: 'Missing target parameter' }));
+  }
+
+  console.log(`Forwarding from ${req.hostname}${req.originalUrl} to ${targetUrl}`);
+
+  proxy.web(req, res, {
+    target: url.parse(targetUrl)
+  });
 })
 
 proxy.on('proxyReq', function(proxyReq, req, res, options) {
@@ -34,7 +45,7 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
 });
 
 function generateAccessToken() {
-  // TODO:
+  // TODO: build when we've got test credentials
   accessToken = 'pretend';
 }
 
