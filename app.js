@@ -12,6 +12,10 @@ const PASSWORD = process.env.PASSWORD || '' ;
 const TOKEN_ENDPOINT = process.env.TOKEN_ENDPOINT || '' ;
 const REFRESH_INTERVAL_HOURS = 12;
 
+const WHITELISTED_TARGET_DOMAINS = [
+  'requestbin.herokuapp.com'
+];
+
 var accessToken = process.env.ACCESS_TOKEN ||'SOMETOKEN';
 
 const httpProxy = require('http-proxy');
@@ -24,6 +28,20 @@ app.get('/', (req, res) => {
   res.send('Hello World');
 });
 
+function validTargetUrl(targetUrl) {
+  const target = url.parse(targetUrl);
+
+  console.dir(target);
+
+  if (target.protocol !== 'https:') {
+    return false;
+  } else if (!_.includes(WHITELISTED_TARGET_DOMAINS, target.host)) {
+    return false;
+  }
+
+  return true;
+};
+
 app.post('/proxy', (req, res) => {
   const targetUrl = req.query['target'];
 
@@ -31,6 +49,12 @@ app.post('/proxy', (req, res) => {
     return res.
       status(400).
       send(JSON.stringify({ error: 'Missing target parameter' }));
+  }
+
+  if (!validTargetUrl(targetUrl)) {
+    return res.
+      status(400).
+      send(JSON.stringify({ error: 'Invalid target URL.'}));
   }
 
   console.log(`Forwarding from ${req.hostname}${req.originalUrl} to ${targetUrl}`);
