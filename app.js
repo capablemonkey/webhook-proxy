@@ -1,3 +1,5 @@
+require('newrelic');
+
 const url = require('url');
 const _ = require('lodash');
 const redis = require('redis').createClient(process.env.REDIS_URL || '//localhost:6379');
