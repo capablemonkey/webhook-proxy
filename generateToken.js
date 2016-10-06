@@ -1,25 +1,40 @@
+const url = require('url');
 const redis = require('redis').createClient(process.env.REDIS_URL || '//localhost:6379');
+const oauth2 = require('simple-oauth2').create({
+  client: {
+    id: process.env.CLIENT_ID,
+    secret: process.env.CLIENT_SECRET
+  },
+  auth: {
+    tokenPath: process.env.TOKEN_PATH,
+    tokenHost: process.env.TOKEN_HOST
+  }
+});
 
-const CLIENT_ID = process.env.CLIENT_ID || '' ;
-const CLIENT_SECRET = process.env.CLIENT_SECRET || '' ;
-const USERNAME = process.env.USERNAME || '' ;
-const PASSWORD = process.env.PASSWORD || '' ;
-const TOKEN_ENDPOINT = process.env.TOKEN_ENDPOINT || '' ;
+const CREDENTIALS = {
+  username: process.env.OWNER_USERNAME,
+  password: process.env.OWNER_PASSWORD
+};
 
 function generateAccessToken(callback) {
-  // fake generator for now
-  return callback(null, (new Date).toISOString());
+  oauth2.ownerPassword.
+    getToken(CREDENTIALS, (error, result) => {
+      if (error) {
+        throw new Error(`Error fetching access token ${error}`);
+      }
+
+      callback(error, result.access_token);
+    });
 }
 
 function renewAccessToken() {
   generateAccessToken((error, access_token) => {
     redis.set('access_token', access_token, (error, result) => {
         if (error) {
-          console.error('Error persisting token in redis: ', error.stack);
-        } else {
-          console.log('Successfully stored new token in redis');
+          throw new Error('Error persisting token in redis: ', error.stack);
         }
 
+        console.log('Successfully stored new token in redis');
         process.exit();
       });
   });
