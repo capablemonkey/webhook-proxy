@@ -19,3 +19,11 @@ Run the access token generator (this should be run periodically if the access to
 ```
 node generateToken.js
 ```
+
+## Tests
+
+Run tests:
+
+```
+npm test
+```
