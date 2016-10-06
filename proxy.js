@@ -4,9 +4,7 @@ const redis = require('redis').createClient(process.env.REDIS_URL || '//localhos
 const express = require('express');
 const server = express();
 
-const WHITELISTED_TARGET_DOMAINS = [
-  'requestbin.herokuserver.com'
-];
+const WHITELISTED_TARGET_DOMAINS = process.env.TARGET_DOMAIN_WHITELIST.split(',');
 
 const httpProxy = require('http-proxy');
 const proxy = httpProxy.createProxyServer({
