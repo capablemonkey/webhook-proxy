@@ -1,3 +1,5 @@
+process.env['TARGET_DOMAIN_WHITELIST'] = 'google.com,greenhouse.io';
+
 const assert = require('assert');
 const request = require('supertest');
 const proxy = require('../proxy.js');
