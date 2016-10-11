@@ -4,11 +4,11 @@ const assert = require('assert');
 const request = require('supertest');
 const proxy = require('../proxy.js');
 
-describe('GET /', () => {
-  it('respond with greeting', (done) => {
+describe('GET /ping', () => {
+  it('respond with pong and timestamp', (done) => {
     request(proxy)
-      .get('/')
-      .expect('Hello World')
+      .get('/ping')
+      .expect(/^PONG (\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})\.(\d{3})Z/)
       .expect(200, done);
   });
 });
