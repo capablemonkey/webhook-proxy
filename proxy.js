@@ -12,8 +12,8 @@ const proxy = httpProxy.createProxyServer({
   changeOrigin: true
 });
 
-server.get('/', (req, res) => {
-  res.send('Hello World');
+server.get('/ping', (req, res) => {
+  res.send(`PONG ${(new Date).toISOString()}`);
 });
 
 function validTargetUrl(targetUrl) {
